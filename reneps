@@ -1,0 +1,105 @@
+#!/bin/sh
+
+show_name=$(basename `pwd`)
+show_season="1"
+show_start_episode="1"
+
+dry_run=false
+
+re='^[0-9]+$'
+
+rename_episodes() {
+  for filename in *.*;
+  do
+    extension="${filename##*.}"
+    show_start_episode_tmp="$show_start_episode"
+    show_season_tmp="$show_season"
+
+    if [ $show_season -lt "10" ]; then
+      show_season_tmp="0$show_season"
+    fi
+
+    if [ $show_start_episode_tmp -lt "10" ]; then
+      show_start_episode_tmp="0$show_start_episode_tmp"
+    fi
+
+    episode_name="$show_name S$show_season_tmp""E$show_start_episode_tmp.$extension"
+
+    printf "$filename -> $episode_name"
+    printf "\n"
+
+    if ! $dry_run; then
+      mv "$filename" "$episode_name"
+    fi
+
+    ((show_start_episode++))
+  done
+}
+
+usage() {
+cat << EOF
+Usage: $0 [options]
+
+Renames all files in the current folder to match specified naming conventions for osmc.
+
+EXAMPLE:
+    $0 -n "Best Show Ever" -S 2 -E 1
+
+OPTIONS:
+   -h           Show this help message
+   -n           Specify the name of the show, defaults to parent folder name.
+   -s           Specify the season of the show, defaults to 1
+   -e           Specify the episode number to start the count with,
+                defaults to 1
+   --dry-run    Dry run shows which files will be renamed and to what,
+                without renaming any of them
+EOF
+}
+
+while getopts "hn:s:e:-:" OPTION
+do
+  case $OPTION in
+    -)
+      case "${OPTARG}" in
+        dry-run)
+          dry_run=true
+          ;;
+        *)
+          if [ "$OPTERR" = 1 ] && [ "${optspec:0:1}" != ":" ]; then
+            usage
+            exit 1
+          fi
+          ;;
+      esac
+      ;;
+    h)
+      usage
+      exit 0
+      ;;
+    n)
+      if [ ! -z "$OPTARG" ]; then
+        show_name=$OPTARG
+      fi
+      ;;
+    s)
+      if [ ! -z "$OPTARG" ] && [[ $OPTARG =~ $re ]]; then
+        show_season=$OPTARG
+      fi
+      ;;
+    e)
+      if [ ! -z "$OPTARG" ] && [[ $OPTARG =~ $re ]]; then
+        show_start_episode=$OPTARG
+      fi
+      ;;
+    \?)
+      usage
+      exit 1
+      ;;
+  esac
+done
+
+if $dry_run; then
+  printf "Running in dry mode. No files will be renamed\n"
+fi
+
+rename_episodes
