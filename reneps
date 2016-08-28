@@ -1,12 +1,15 @@
 #!/bin/sh
 
+forms=("webm" "mkv" "flv" "vob" "ogv" "ogg" "drc" "gif" "gifv" "mng" "avi" "mov"
+"qt" "wmv" "yuv" "rm" "rmvb" "asf" "amv" "mp4" "m4p" "m4v" "mpg" "mp2" "mpeg"
+"mpe" "mpv" "m2v" "svi" "3gp" "3g2" "mxf" "roq" "nsv" "f4v" "f4p" "f4a" "f4b")
+re='^[0-9]+$'
+
 show_name=$(basename `pwd`)
 show_season="1"
 show_start_episode="1"
 
 dry_run=false
-
-re='^[0-9]+$'
 
 rename_episodes() {
   for filename in *.*;
@@ -15,24 +18,26 @@ rename_episodes() {
     show_start_episode_tmp="$show_start_episode"
     show_season_tmp="$show_season"
 
-    if [ $show_season -lt "10" ]; then
-      show_season_tmp="0$show_season"
+    if echo ${forms[@]} | grep -q -w "$extension"; then
+      if [ $show_season -lt "10" ]; then
+        show_season_tmp="0$show_season"
+      fi
+
+      if [ $show_start_episode_tmp -lt "10" ]; then
+        show_start_episode_tmp="0$show_start_episode_tmp"
+      fi
+
+      episode_name="$show_name S$show_season_tmp""E$show_start_episode_tmp.$extension"
+
+      printf "$filename -> $episode_name"
+      printf "\n"
+
+      if ! $dry_run; then
+        mv "$filename" "$episode_name"
+      fi
+
+      ((show_start_episode++))
     fi
-
-    if [ $show_start_episode_tmp -lt "10" ]; then
-      show_start_episode_tmp="0$show_start_episode_tmp"
-    fi
-
-    episode_name="$show_name S$show_season_tmp""E$show_start_episode_tmp.$extension"
-
-    printf "$filename -> $episode_name"
-    printf "\n"
-
-    if ! $dry_run; then
-      mv "$filename" "$episode_name"
-    fi
-
-    ((show_start_episode++))
   done
 }
 

@@ -1,5 +1,5 @@
 # reneps
-Bash script for renaming multiple episodes of a show without hassle. Place in folder currently in your $PATH (ex. /usr/local/bin) to allow execution without './' and without needing to place the script in each folder where you want to rename episodes. Make sure you're not using this script while in a folder with important files as it will rename all files (that has a file extension) in that folder.
+Bash script for renaming multiple episodes of a show without hassle. Place in folder currently in your $PATH (ex. /usr/local/bin) to allow execution without './' and without needing to place the script in each folder where you want to rename episodes.
 
 ## Usage
 ```
